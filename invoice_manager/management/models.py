@@ -22,11 +22,17 @@ class Invoice(models.Model):
     total_price = models.IntegerField(blank=True, null=True, verbose_name="total price")
 
 class ProductInvoice(models.Model):
-    product = models.ForeignKey(ProductRate, on_delete=models.PROTECT, related_name="product_invoices", verbose_name="product")
+    product = models.ForeignKey(ProductRate, on_delete=models.CASCADE, related_name="product_invoices", verbose_name="product")
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name="invoices", verbose_name="invoice")
     quantity = models.PositiveIntegerField(verbose_name="quantity")
     price = models.DecimalField(blank=True, null=True, max_digits=10, decimal_places=2, verbose_name="price")
+    update = models.BooleanField(default=False)
+
+    @property
+    def product_rate(self):
+        return self.product.rate
 
     def save(self, *args, **kwargs):
         self.price = self.product.rate * self.quantity
+        self.update = False
         return super().save(*args, **kwargs)
