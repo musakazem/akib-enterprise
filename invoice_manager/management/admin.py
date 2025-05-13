@@ -2,16 +2,13 @@ from django.contrib import admin
 from weasyprint import HTML, CSS
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-
-
 from django.contrib import admin
+from datetime import datetime
 
 from management.models import Product, ProductRate, ProductInvoice, Invoice
 
 import os
-
 os.add_dll_directory(r"C:\Program Files\GTK3-Runtime Win64\bin")
-
 
 
 @admin.action(description='Generate PDF')
@@ -60,6 +57,16 @@ class ProductRateAdmin(admin.ModelAdmin):
     list_display = ("product", "rate")
     list_editable = ("rate",)
     search_fields = ("product__name",)
+
+    def save_model(self, request, obj, form, change):
+        form_change = form.initial.get("rate") != obj.rate
+        if form_change:
+            if obj.rate_history and obj.rate_history.get("data"):
+                obj.rate_history["data"].append({"rate": form.initial.get("rate"), "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+            else:
+                obj.rate_history = {"data": [{"rate": form.initial.get("rate"), "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]}
+
+        return super().save_model(request, obj, form, change)
 
 class ProductInvoiceInline(admin.TabularInline):
     model = ProductInvoice

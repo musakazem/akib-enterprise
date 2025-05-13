@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import datetime
 
 class Product(models.Model):
     name = models.CharField(max_length=250, verbose_name="product")
@@ -10,9 +10,11 @@ class Product(models.Model):
 class ProductRate(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_rates", verbose_name="product")
     rate = models.IntegerField(verbose_name="rate")
+    rate_history = models.JSONField(null=True, blank=True, verbose_name="rate history")
 
     def __str__(self) -> str:
         return self.product.name
+
 
 class Invoice(models.Model):
     customer_name = models.CharField(verbose_name="customer name", max_length=150)
